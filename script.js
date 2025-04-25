@@ -1,4 +1,4 @@
- const apiKey = 'GwJnNpEL9dnHevY0nLui';//chave da api| TO-DO: colocar a chave da empresa
+ const apiKey = 'OpUloC_wKZOzOVbg1tTgzg';//chave da api| TO-DO: colocar a chave da empresa GwJnNpEL9dnHevY0nLui
 
 
  const params = new URLSearchParams(window.location.search);//pega os parâmetros da URL
@@ -18,24 +18,52 @@
     if (pontos.length === 0) { //se não houver pontos, coloca um padrão
       pontos = [{ lat: -23.5505, lng: -46.6333, texto: "Ponto padrão" }];
     }
+    const platform = new H.service.Platform({
+      'apikey': apiKey
+  });
+  
 
-    const platform = new H.service.Platform({ apikey: apiKey });//instancia a plataforma
-    const defaultLayers = platform.createDefaultLayers();//instancia os layers padrão
+// Initialize the engine type:
+const engineType = H.Map.EngineType['HARP'];
 
-    const map = new H.Map(//instancia o mapa
-      document.getElementById('mapContainer'),
-      defaultLayers.vector.normal.map,
-      {
-        center: { lat: pontos[0].lat, lng: pontos[0].lng },
-        zoom: 10,
-        pixelRatio: window.devicePixelRatio || 1
-      }
-    );
-    // Adiciona os controles de zoom e a barra de escala
-    const behavior = new H.mapevents.Behavior(new H.mapevents.MapEvents(map));
-    const ui = H.ui.UI.createDefault(map, defaultLayers);
-    
-    
+// Obtain the default map types from the platform object:
+const defaultLayers = platform.createDefaultLayers({
+    engineType: engineType
+});
+
+// Instantiate (and display) a map:
+const map = new H.Map(
+    document.getElementById("mapContainer"),
+    defaultLayers.hybrid.day.raster, {
+        engineType: engineType,
+        zoom: 14,
+        pixelRatio: 2,
+        center: {
+                lat: 45.5048,
+                lng: -73.5870
+            }
+    });
+
+map.addLayer(defaultLayers.hybrid.day.vector);
+
+// MapEvents enables the event system.
+// The behavior variable implements default interactions for pan/zoom (also on mobile touch environments).
+const behavior = new H.mapevents.Behavior(new H.mapevents.MapEvents(map));
+
+// Enable dynamic resizing of the map, based on the current size of the enclosing cntainer
+window.addEventListener('resize', () => map.getViewPort().resize());
+
+// Create the default UI:
+const ui = H.ui.UI.createDefault(map, defaultLayers)
+
+// Create an info bubble with the HTML content
+const coords = { lat: 45.5048, lng: -73.5870 };
+const infoBubble = new H.ui.InfoBubble(coords, {
+    content: '<b>Mount Royal</b><br>A hill in Montreal with stunning city views'
+});
+
+ui.addBubble(infoBubble);
+/*
     pontos.forEach((ponto, index) => {//para cada ponto, cria um marcador
       const html = `<div class="custom-label">${ponto.texto}</div>`;
       const domIcon = new H.map.DomIcon(html);
@@ -57,4 +85,4 @@
     if (pontos.length > 1) {
       const bounds = pontos.reduce((bbox, p) => bbox.extend(p), new H.geo.Rect(pontos[0].lat, pontos[0].lng, pontos[0].lat, pontos[0].lng));
       map.getViewModel().setLookAtData({ bounds: bounds });
-    }
+    }*/

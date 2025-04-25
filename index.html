@@ -1,39 +1,61 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <meta charset="utf-8" />
-  <title>HERE Map Interativo</title>
-  <meta name="viewport" content="initial-scale=1.0, width=device-width" />
-  <style>
-    #mapContainer {
-      width: 100%;
-      height: 100vh;
-    }
+  <head>
+    <script type="text/javascript" src="https://js.api.here.com/v3/3.1/mapsjs-core.js"></script>
+    <script type="text/javascript" src="https://js.api.here.com/v3/3.1/mapsjs-harp.js"></script>
+    <script type="text/javascript" src="https://js.api.here.com/v3/3.1/mapsjs-service.js"></script>
+    <script type="text/javascript" src="https://js.api.here.com/v3/3.1/mapsjs-mapevents.js"></script>
+    <script type="text/javascript" charset="utf-8" src="https://js.api.here.com/v3/3.1/mapsjs-ui.js" ></script>
+    <link rel="stylesheet" type="text/css" href="https://js.api.here.com/v3/3.1/mapsjs-ui.css" />
+  </head>
+  <body>
+    <div style="width: 1000px; height: 500px" id="mapContainer"></div>
+    <script>
+            // Initiate and authenticate your connection to the HERE platform:
+        const platform = new H.service.Platform({
+            'apikey': 'OpUloC_wKZOzOVbg1tTgzg'
+        });
 
-    .custom-label {
-      background: white;
-      border: 1px solid #888;
-      border-radius: 6px;
-      padding: 4px 8px;
-      font-size: 14px;
-      white-space: nowrap;
-      box-shadow: 0px 2px 6px rgba(0,0,0,0.2);
-      transform: translate(-50%, -100%);
-      cursor: pointer;
-    }
-  </style>
-  <!-- Scripts da HERE -->
-  <script src="https://js.api.here.com/v3/3.1/mapsjs-core.js"></script>
-  <script src="https://js.api.here.com/v3/3.1/mapsjs-service.js"></script>
-  <script src="https://js.api.here.com/v3/3.1/mapsjs-ui.js"></script>
-  <script src="https://js.api.here.com/v3/3.1/mapsjs-mapevents.js"></script>
-  <link rel="stylesheet" href="https://js.api.here.com/v3/3.1/mapsjs-ui.css" />
-</head>
-<body>
-  <div id="mapContainer"></div>
+        // Initialize the engine type:
+        const engineType = H.Map.EngineType['HARP'];
 
-  <script src="./script.js"></script>
- 
-  </script>
-</body>
+        // Obtain the default map types from the platform object:
+        const defaultLayers = platform.createDefaultLayers({
+            engineType: engineType
+        });
+
+        // Instantiate (and display) a map:
+        const map = new H.Map(
+            document.getElementById("mapContainer"),
+            defaultLayers.hybrid.day.raster, {
+                engineType: engineType,
+                zoom: 14,
+                pixelRatio: 2,
+                center: {
+                        lat: 45.5048,
+                        lng: -73.5870
+                    }
+            });
+
+        map.addLayer(defaultLayers.hybrid.day.vector);
+
+        // MapEvents enables the event system.
+        // The behavior variable implements default interactions for pan/zoom (also on mobile touch environments).
+        const behavior = new H.mapevents.Behavior(new H.mapevents.MapEvents(map));
+
+        // Enable dynamic resizing of the map, based on the current size of the enclosing cntainer
+        window.addEventListener('resize', () => map.getViewPort().resize());
+
+        // Create the default UI:
+        const ui = H.ui.UI.createDefault(map, defaultLayers)
+
+        // Create an info bubble with the HTML content
+        const coords = { lat: 45.5048, lng: -73.5870 };
+        const infoBubble = new H.ui.InfoBubble(coords, {
+            content: '<b>Mount Royal</b><br>A hill in Montreal with stunning city views'
+        });
+
+        ui.addBubble(infoBubble);
+    </script>
+  </body>
 </html>
